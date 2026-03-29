@@ -1,0 +1,30 @@
+name: Manual Deploy to Render
+
+on:
+  # This event allows you to manually trigger the workflow from the GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: 'Reason for deployment'
+        required: false
+        default: 'Manual trigger'
+
+jobs:
+  deploy:
+    name: Deploy Static Site to Render
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render Deployment
+        run: |
+          echo "Start deployment: ${{ github.event.inputs.reason }}"
+          if [ -z "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" ]; then
+            echo "Error: RENDER_DEPLOY_HOOK_URL secret is missing from GitHub Secrets!"
+            exit 1
+          fi
+          
+          # Ping the Render deploy hook URL to start the build
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+          
+          echo "Deployment triggered successfully!"
+          echo "Note: You can check the progress of the build in your Render Dashboard."
